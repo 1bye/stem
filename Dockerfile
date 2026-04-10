@@ -5,8 +5,17 @@ WORKDIR /app
 
 # Copy workspace configuration first
 COPY package.json bun.lock turbo.json ./
+
+# Copy all workspace packages that are dependencies
+COPY packages/config/package.json ./packages/config/
+COPY packages/config/tsconfig.json ./packages/config/
 COPY packages/env/package.json ./packages/env/
 COPY packages/env/src ./packages/env/src/
+COPY packages/env/tsconfig.json ./packages/env/
+COPY packages/db/package.json ./packages/db/
+COPY packages/db/src ./packages/db/src/
+COPY packages/db/drizzle.config.ts ./packages/db/
+COPY packages/db/tsconfig.json ./packages/db/
 COPY apps/server/package.json ./apps/server/
 COPY apps/server/tsconfig.json ./apps/server/
 COPY apps/server/tsdown.config.ts ./apps/server/
