@@ -3,8 +3,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     environment:
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
       - DATABASE_URL=${DATABASE_URL:-postgres://localhost:5432/dummy}
