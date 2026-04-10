@@ -14,5 +14,6 @@ export default defineConfig({
 		"zod",
 		"dotenv",
 		"evlog",
+		"evlog/elysia",
 	],
 });
