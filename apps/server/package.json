@@ -11,15 +11,19 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
+    "@elysiajs/openapi": "^1.4.14",
     "@stem/db": "workspace:*",
     "@stem/env": "workspace:*",
     "dotenv": "catalog:",
     "elysia": "^1.4.21",
+    "elysia-rate-limit": "^4.2.1",
+    "nodemailer": "^6.10.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@stem/config": "workspace:*",
     "@types/bun": "catalog:",
+    "@types/nodemailer": "^6.4.17",
     "tsdown": "^0.16.5",
     "typescript": "catalog:"
   }

@@ -1,0 +1,35 @@
+services:
+  smtp-proxy:
+    build:
+      context: ../..
+      dockerfile: apps/server/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # Required: CORS origin
+      - CORS_ORIGIN=http://localhost:3000
+
+      # Required: Database URL (can be dummy for stateless mode)
+      - DATABASE_URL=postgres://localhost:5432/dummy
+
+      # Required: SMTP providers JSON configuration
+      # Example with Gmail
+      - SMTP_PROVIDERS=[{"name":"gmail","host":"smtp.gmail.com","port":587,"secure":false,"auth":{"user":"your-email@gmail.com","pass":"your-app-password"}}]
+
+      # Required: Comma-separated API keys
+      - API_KEYS=your-api-key-1,your-api-key-2
+
+      # Optional: Attachment size limit (default: 10MB)
+      - MAX_ATTACHMENT_SIZE=10MB
+
+      # Optional: Rate limit per minute (default: 60)
+      - RATE_LIMIT_PER_MINUTE=60
+
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3000/').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
