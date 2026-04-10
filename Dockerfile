@@ -8,7 +8,7 @@ COPY package.json bun.lock turbo.json ./
 
 # Copy all workspace packages that are dependencies
 COPY packages/config/package.json ./packages/config/
-COPY packages/config/tsconfig.json ./packages/config/
+COPY packages/config/tsconfig.base.json ./packages/config/
 COPY packages/env/package.json ./packages/env/
 COPY packages/env/src ./packages/env/src/
 COPY packages/env/tsconfig.json ./packages/env/
