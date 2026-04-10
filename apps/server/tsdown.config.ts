@@ -5,5 +5,14 @@ export default defineConfig({
 	format: "esm",
 	outDir: "./dist",
 	clean: true,
-	noExternal: [/@stem\/.*/, /@elysiajs\/.*/, "elysia", "elysia-rate-limit", "nodemailer", "zod", "dotenv"],
+	noExternal: [
+		/@stem\/.*/,
+		/@elysiajs\/.*/,
+		"elysia",
+		"elysia-rate-limit",
+		"nodemailer",
+		"zod",
+		"dotenv",
+		"evlog",
+	],
 });

@@ -17,6 +17,7 @@
     "dotenv": "catalog:",
     "elysia": "^1.4.21",
     "elysia-rate-limit": "^4.2.1",
+    "evlog": "latest",
     "nodemailer": "^6.10.0",
     "zod": "catalog:"
   },

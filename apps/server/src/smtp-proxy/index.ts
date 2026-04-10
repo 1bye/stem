@@ -2,10 +2,16 @@ import { openapi } from "@elysiajs/openapi";
 import { env } from "@stem/env/server";
 import { Elysia, t } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
+import { initLogger } from "evlog";
+import { evlog } from "evlog/elysia";
 import { z } from "zod";
 import { extractBearerToken, validateApiKey } from "./auth.js";
 import { checkProviderHealth, sendEmail } from "./sender.js";
 import { validateEmailPayload } from "./validation.js";
+
+initLogger({
+	env: { service: "smtp-proxy" },
+});
 
 const emailRequestSchema = t.Object({
 	to: t.Union([t.String(), t.Array(t.String())]),
@@ -61,6 +67,7 @@ export const smtpProxyPlugin = new Elysia({
 		security: [{ bearerAuth: [] }],
 	},
 })
+	.use(evlog())
 	.use(
 		openapi({
 			documentation: {
@@ -103,28 +110,47 @@ export const smtpProxyPlugin = new Elysia({
 			scoping: "global",
 		})
 	)
-	.onBeforeHandle(({ headers, set }) => {
+	.onBeforeHandle(({ headers, set, log }) => {
 		const authHeader = headers.authorization;
 		const token = extractBearerToken(authHeader);
 
+		log.set({ auth: { hasToken: !!token } });
+
 		if (!(token && validateApiKey(token))) {
+			log.set({ auth: { valid: false } });
 			set.status = 401;
 			return {
 				success: false,
 				error: "Unauthorized: Invalid or missing API key",
 			};
 		}
+
+		log.set({ auth: { valid: true } });
 	})
 	.post(
 		"/send",
-		async ({ body }) => {
+		async ({ body, log }) => {
+			log.set({ email: { to: body.to, subject: body.subject } });
+
 			const validation = validateEmailPayload(body);
 
 			if (!validation.success) {
+				log.set({ validation: { success: false, error: validation.error } });
 				return { success: false, error: validation.error };
 			}
 
+			log.set({ validation: { success: true } });
+
 			const result = await sendEmail(validation.data);
+
+			log.set({
+				email: {
+					sent: result.success,
+					provider: result.success ? result.provider : undefined,
+					messageId: result.success ? result.messageId : undefined,
+				},
+			});
+
 			return result;
 		},
 		{
@@ -145,9 +171,19 @@ export const smtpProxyPlugin = new Elysia({
 	)
 	.get(
 		"/health",
-		async () => {
+		async ({ log }) => {
 			const providers = await checkProviderHealth();
 			const allHealthy = providers.every((p) => p.healthy);
+
+			log.set({
+				health: {
+					status: allHealthy ? "healthy" : "degraded",
+					providers: providers.map((p) => ({
+						name: p.name,
+						healthy: p.healthy,
+					})),
+				},
+			});
 
 			return {
 				status: allHealthy ? "healthy" : "degraded",
